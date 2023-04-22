@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Alfred-nice's Starred Repos</title>
+</head>
+
+<body>
+    <h1>Alfred-nice's Starred Repos</h1>
+    <p>
+        Total Starred Repos: <span id="star_count"></span>
+    </p>
+    <ul id="starred_repos">
+    </ul>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var username = "alfred-nice";
+            var per_page = 100;
+            var page = 1;
+            var starred_repos = [];
+
+            function getStarredRepos() {
+                $.get(`https://api.github.com/users/${username}/starred?per_page=${per_page}&page=${page}`, function (data, status, xhr) {
+                    if (data.length > 0) {
+                        starred_repos = starred_repos.concat(data);
+                        page++;
+                        getStarredRepos();
+                    } else {
+                        var star_count = starred_repos.length;
+                        $("#star_count").html(star_count);
+                        // 对repos进行排序，用repo.name排序
+                        starred_repos.sort(function (a, b) {
+                            return a.name.localeCompare(b.name);
+                        });
+
+
+                        for (var i = 0; i < starred_repos.length; i++) {
+                            var repo = starred_repos[i];
+                            var name = repo.name;
+                            var description = repo.description;
+                            var url = repo.html_url;
+
+                            var li = `<li><strong><a href="${url}" target="_blank">${name}</a></strong> - ${description}</li>`;
+                            $("#starred_repos").append(li);
+                        }
+                    }
+                });
+            }
+
+            // Start the process
+            getStarredRepos();
+        });
+    </script>
+</body>
+
+</html>
